@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+
+</head>
+
+<body>
+
+    <style>
+        #movie-list {
+            display: flex;
+            flex-wrap: wrap;
+            /* Allows wrapping of cards when the screen size is small */
+            justify-content: space-between;
+            /* Distribute the space evenly */
+            gap: 20px;
+            /* Gap between the cards */
+            margin-top: 20px;
+        }
+
+        .movie-card {
+            flex: 1 1 calc(33.33% - 20px);
+            /* Each card takes up 1/3 of the space minus the gap */
+            box-sizing: border-box;
+            /* Ensure padding and border do not affect the width */
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-img-top {
+            width: 100%;
+            /* Ensures the image takes up the full width of the card */
+            height: auto;
+            /* Allows the height to adjust automatically based on the aspect ratio */
+            max-height: 300px;
+            /* Limits the height to 300px (or whatever you prefer) */
+            object-fit: contain;
+            /* Ensures the entire image fits inside the box without cropping */
+            object-position: center;
+            /* Centers the image inside the box */
+        }
+
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        button {
+            margin: 5px 0;
+            width: 100%;
+        }
+    </style>
+    <div class="container mt-4">
+        <h1>Movies</h1>
+
+        <!-- Create/Update Movie Form -->
+        <div class="mb-4">
+            <h3 id="form-title">Create a New Movie</h3>
+            <form id="movie-form">
+                <input type="hidden" id="movie-id"> <!-- Hidden field for movie ID -->
+
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="genre">Genre:</label>
+                    <input type="text" class="form-control" id="genre" required>
+                </div>
+                <div class="form-group">
+                    <label for="showDate">Show Date:</label>
+                    <input type="datetime-local" class="form-control" id="showDate" required>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="duration">Duration:</label>
+                    <div class="d-flex">
+                        <input type="number" class="form-control" id="minutes" min="0" placeholder="Minutes" required>
+                        <input type="number" class="form-control ml-2" id="seconds" min="0" max="59"
+                            placeholder="Seconds" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="imgPath">Image URL:</label>
+                    <input type="url" class="form-control" id="imgPath">
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-2" id="form-submit-btn">Add Movie</button>
+                <button type="button" class="btn btn-secondary mt-2" id="form-cancel-btn"
+                    style="display: none;">Cancel</button>
+            </form>
+        </div>
+
+        <!-- Movies List -->
+        <div id="movie-list" class="row">
+            <!-- Movie cards will be populated dynamically -->
+        </div>
+    </div>
+
+    <script>
+        // Base API URL
+        const apiBaseUrl = "http://localhost:5238/api/movie";
+
+        // Function to get a cookie value by name
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Fetch the userName from cookies
+        const userName = getCookie("userName");
+        console.log('Username is: ' + userName);  // You can use this to check if the value is correctly fetched
+
+        const userId = getUserIdByUsername(userName);
+
+        async function getUserIdByUsername(username) {
+            try {
+                const response = await fetch(`http://localhost:5238/api/Auth/get-user-id/${username}`);
+
+                if (!response.ok) {
+                    throw new Error("User not found");
+                }
+
+                const data = await response.json();
+                if (data.userId) {
+                    console.log("User ID: ", data.userId);
+                    return data.userId;  // Return the userId from the function
+                } else {
+                    console.log("User not found");
+                }
+            } catch (error) {
+                console.error("Error fetching userId: ", error);
+            }
+        }
+
+
+
+
+
+        // Fetch and display the movie list
+        function fetchMovies() {
+            fetch(apiBaseUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const movieListContainer = document.getElementById("movie-list");
+                    movieListContainer.innerHTML = ""; // Clear the movie list before appending new items
+
+                    data.forEach(movie => {
+                        const movieItem = document.createElement("div");
+                        movieItem.classList.add("movie-card");
+                        movieItem.innerHTML = `
+                        <div class="card">
+                            <img src="${movie.imgPath}" class="card-img-top" alt="${movie.name}">
+                            <div class="card-body">
+                                <h5 class="card-title">${movie.name}</h5>
+                                <p class="card-text">Duration: ${movie.duration}</p>
+                                <p class="card-text">Genre: ${movie.genre}</p>
+                                <p class="card-text">Show Date: ${movie.showDate}</p>
+                                <button onclick="populateForm(${movie.id})" class="btn btn-warning btn-sm">Edit</button>
+                                <button onclick="deleteMovie(${movie.id})" class="btn btn-danger btn-sm">Delete</button>
+                                <button onclick="addToFavorites(${movie.id})" class="btn btn-success btn-sm">Add to Favorites</button>
+                                <button onclick="openPaymentOptions(${movie.id})" class="btn btn-success btn-sm">Get Tickets</button>
+                            </div>
+                        </div>
+                    `;
+                        movieListContainer.appendChild(movieItem);
+                    });
+                })
+                .catch(error => console.error("Error fetching movies:", error));
+        }
+
+        function openPaymentOptions(movieId) {
+            const modalContent = `
+            <div id="paymentModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                background: white; padding: 20px; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 1000;">
+                <h4>Select Payment Method</h4>
+                <button onclick="payWithCash(${movieId})" class="btn btn-primary">Pay with Cash</button>
+                <button onclick="payWithCard(${movieId})" class="btn btn-secondary">Pay by Card</button>
+                <button onclick="closeModal()" class="btn btn-danger">Cancel</button>
+            </div>
+            <div id="modalOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+        `;
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').remove();
+            document.getElementById('modalOverlay').remove();
+        }
+
+        async function payWithCash(movieId) {
+            const userNameHere = getCookie("userName");
+
+            // Wait for the userId to be fetched
+            const userId = await getUserIdByUsername(userNameHere);
+            if (!userId) {
+                alert("User ID not found. Cannot proceed with reservation.");
+                return;
+            }
+
+            const ticketReservationDto = {
+                userId: userId,
+                movieId: movieId,
+                showTime: new Date().toISOString(),  // Example show time
+                paymentMethod: "cash"
+            };
+
+            sendReservationRequest(ticketReservationDto);
+            closeModal();
+        }
+
+        async function payWithCard(movieId) {
+            const userNameHere = getCookie("userName");
+
+            // Wait for the userId to be fetched
+            const userId = await getUserIdByUsername(userNameHere);
+            if (!userId) {
+                alert("User ID not found. Cannot proceed with reservation.");
+                return;
+            }
+
+            const ticketReservationDto = {
+                userId: userId,
+                movieId: movieId,
+                showTime: new Date().toISOString(),  // Example show time
+                paymentMethod: "card"
+            };
+
+            sendReservationRequest(ticketReservationDto);
+            closeModal();
+        }
+
+        function sendReservationRequest(ticketReservationDto) {
+            const token = getCookie("accessToken");
+
+            fetch("http://localhost:5238/api/ticketreservation", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(ticketReservationDto)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Ticket reservation successful!");
+                    } else {
+                        alert("Error while reserving ticket: " + response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error while reserving ticket: " + error.message);
+                });
+        }
+
+        // Populate the form with the movie data for editing
+        function populateForm(movieId) {
+            fetch(`${apiBaseUrl}/${movieId}`)
+                .then(response => response.json())
+                .then(movie => {
+                    document.getElementById("movie-id").value = movie.id;
+                    document.getElementById("name").value = movie.name;
+                    document.getElementById("genre").value = movie.genre;
+                    document.getElementById("showDate").value = movie.showDate;
+
+                    // Parse the duration into minutes and seconds
+                    const durationParts = movie.duration.split(":");
+                    document.getElementById("minutes").value = durationParts[0];
+                    document.getElementById("seconds").value = durationParts[1];
+
+                    document.getElementById("imgPath").value = movie.imgPath;
+
+                    // Change the form title and button for editing
+                    document.getElementById("form-title").innerText = "Edit Movie";
+                    document.getElementById("form-submit-btn").innerText = "Update Movie";
+                    document.getElementById("form-cancel-btn").style.display = "inline-block";
+                })
+                .catch(error => console.error("Error populating form:", error));
+        }
+
+        // Event listener for form submission (either Create or Edit)
+        document.getElementById("movie-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            // Prepare the movie data from the form
+            const movieData = {
+                id: document.getElementById("movie-id").value,
+                name: document.getElementById("name").value,
+                genre: document.getElementById("genre").value,
+                showDate: document.getElementById("showDate").value,
+                duration: `${document.getElementById("minutes").value}:${document.getElementById("seconds").value}`,
+                imgPath: document.getElementById("imgPath").value,
+            };
+
+            const method = movieData.id ? "PUT" : "POST";
+            const url = movieData.id ? `${apiBaseUrl}/${movieData.id}` : apiBaseUrl;
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(movieData)
+            })
+                .then(response => response.json())
+                .then(() => {
+                    fetchMovies(); // Refresh movie list after submission
+                    document.getElementById("movie-form").reset();
+                })
+                .catch(error => console.error("Error saving movie:", error));
+        });
+
+        function deleteMovie(movieId) {
+            const token = getCookie('accessToken'); // Get token from cookies
+
+            if (!token) {
+                alert("No token found! Please log in again.");
+                return;
+            }
+
+            try {
+                const decodedToken = jwt_decode(token); // Decode the token to check roles
+                console.log("Decoded Token:", decodedToken);
+
+                // Check if the user has the 'Admin' role
+                if (!decodedToken.role || decodedToken.role !== 'Admin') {
+                    alert("You are not authorized to delete movies. Admin role required.");
+                    return;
+                }
+
+                // Make the DELETE request
+                fetch(`${apiBaseUrl}/${movieId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
+                        "Content-Type": "application/json"
+                    },
+                    credentials: 'include' // Ensure cookies are included in the request
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log("Movie deleted successfully!");
+                            fetchMovies(); // Refresh movie list after deletion
+                        } else if (response.status === 401) {
+                            alert("Unauthorized: Please log in again.");
+                        } else {
+                            alert("Error deleting movie. Please try again.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error deleting movie:", error);
+                        alert("An error occurred while deleting the movie.");
+                    });
+
+            } catch (error) {
+                console.error("Invalid token or decoding error:", error);
+                alert("Invalid token. Please log in again.");
+            }
+        }
+
+
+        // Check the roles in the payload
+
+
+        // Utility function to get cookie by name (if using cookies for storing the token)
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+
+        // Add to favorites (example implementation)
+        function addToFavorites(movieId) {
+            console.log(`Added movie with ID ${movieId} to favorites.`);
+        }
+        async function addToFavorites(movieId) {
+            const userNameHere = getCookie("userName");
+
+            // Wait for the userId to be fetched
+            const userId = await getUserIdByUsername(userNameHere);
+            if (!userId) {
+                alert("User ID not found. Cannot add to favorites.");
+                return;
+            }
+
+            const favoriteMovieDto = {
+                userId: userId,
+                movieId: movieId
+            };
+
+            fetch("http://localhost:5238/api/movieuser/add-to-favorites", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${getCookie("accessToken")}`
+                },
+                body: JSON.stringify(favoriteMovieDto)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Movie added to favorites!");
+                    } else {
+                        alert("Error while adding movie to favorites: " + response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error while adding movie to favorites: " + error.message);
+                });
+        }
+
+
+        // Initialize the movie list
+        fetchMovies();
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,378 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - iMovies</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        /* Custom button hover effect */
+        .btn-link {
+            transition: all 0.3s ease;
+        }
+
+        .btn-link:hover {
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            transform: scale(1.05);
+        }
+
+        /* Footer styling */
+        footer {
+            background-color: #333;
+            color: white;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            /* Push the footer to the bottom */
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        /* Navbar brand styling */
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Navbar links styling */
+        .nav-link {
+            color: #333;
+            font-size: 1rem;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #007bff;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        /* Navbar login/register buttons styling */
+        .btn-login,
+        .btn-register {
+            font-size: 1rem;
+            padding: 8px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-login {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-register {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-login:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        .btn-register:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        /* Add space between buttons */
+        .navbar-nav .nav-item+.nav-item {
+            margin-left: 10px;
+            /* Space between login and register buttons */
+        }
+
+        /* Navbar responsive adjustments */
+        .navbar-nav {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .navbar-toggler-icon {
+            background-color: #007bff;
+        }
+
+        /* Cool Text Section 1: Our Mission */
+        /* Cool Text Section 1: Our Mission */
+        .section {
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            padding: 60px 20px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: white;
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .section p.lead {
+            font-size: 1.25rem;
+            margin-top: 20px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Cool Text Section 2: Why Choose Us */
+        .why-choose-us {
+            background-color: #343a40;
+            padding: 60px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: white;
+        }
+
+        .why-choose-us h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffc107;
+        }
+
+        .why-choose-us p.lead {
+            font-size: 1.25rem;
+            margin-top: 20px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .why-choose-us ul.list-unstyled {
+            font-size: 1.1rem;
+            padding-left: 0;
+            list-style-type: none;
+            margin-top: 30px;
+        }
+
+        .why-choose-us ul.list-unstyled li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .why-choose-us ul.list-unstyled li i {
+            color: #28a745;
+            margin-right: 10px;
+            font-size: 1.25rem;
+        }
+
+        /* Cool Text Section 3: Join Us Today */
+        .join-us {
+            background: #007bff;
+            padding: 60px 20px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .join-us h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .join-us p.lead {
+            font-size: 1.25rem;
+            margin-top: 20px;
+            color: white;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .join-us a.btn-register {
+            background-color: #28a745;
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            border-radius: 50px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .join-us a.btn-register:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        /* Cool Text Section 4: Our Promise */
+        .promise {
+            background: #ff8c00;
+            padding: 60px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .promise h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .promise p.lead {
+            font-size: 1.25rem;
+            color: white;
+            margin-top: 20px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #333;">
+            <div class="container">
+                <a class="navbar-brand text-white" href="/">iMovies</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon" style="background-color: #007bff;"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto d-flex align-items-center">
+                        <li class="nav-item">
+                            <a class="btn btn-primary" href="@Url.Action("Index", "Movies")">Movies</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="btn btn-primary" href="/ViewMovieUser">Favorites</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary" href="/ViewTicketReservation">My Ticket Reservations</a>
+                        </li>
+
+
+
+                        <!-- Placeholder for username and logout -->
+                        <li id="usernameContainer" class="nav-item" style="display: none;">
+                            <span id="usernameText" class="text-white"></span>
+                        </li>
+                        <li id="logoutContainer" class="nav-item" style="display: none;">
+                            <a id="logoutButton" class="nav-link btn btn-login text-white" href="#">Logout</a>
+                        </li>
+                        <!-- Login/Register for unauthenticated users -->
+                        <li id="loginContainer" class="nav-item" style="display: none;">
+                            <a class="nav-link btn btn-login text-white" href="@Url.Action("Login", "Account")">
+                                Login
+                            </a>
+                        </li>
+                        <li id="registerContainer" class="nav-item" style="display: none;">
+                            <a class="nav-link btn btn-register text-white" href="@Url.Action("Register", "Account")">
+                                Register
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="container mt-3 py-5">
+        @RenderBody()
+
+        @if (ViewData["IsHomePage"] != null && (bool)ViewData["IsHomePage"])
+        {
+            <!-- Cool Text Section 1: Our Mission -->
+            <section class="section mb-5">
+                <h2 class="display-4 fw-bold">Our Mission</h2>
+                <p class="lead">At iMovies, we aim to provide movie lovers with the best selection of high-quality films.
+                    From timeless classics to the latest hits, we bring the cinema experience directly to your screen.</p>
+            </section>
+
+            <!-- Cool Text Section 2: Why Choose Us -->
+            <section class="why-choose-us mb-5">
+                <h2 class="display-4 fw-bold">Why Choose iMovies?</h2>
+                <p class="lead">We don't just offer movies – we offer an experience. Our platform is easy to use, curated
+                    with care, and delivers the most exciting content tailored to your tastes.</p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle"></i> A wide selection of genres for every taste.</li>
+                    <li><i class="bi bi-check-circle"></i> Stream movies in stunning HD quality.</li>
+                    <li><i class="bi bi-check-circle"></i> Enjoy a seamless user experience across devices.</li>
+                    <li><i class="bi bi-check-circle"></i> Curated recommendations based on your preferences.</li>
+                </ul>
+            </section>
+
+            <!-- Cool Text Section 3: Join Us Today -->
+            <section class="join-us mb-5">
+                <h2 class="display-4 fw-bold">Join iMovies Today!</h2>
+                <p class="lead">Ready to start your cinematic journey? Sign up now and unlock a world of entertainment at
+                    your fingertips!</p>
+                <a href="@Url.Action("Register", "Account")" class="btn btn-register btn-lg">Get Started</a>
+            </section>
+
+            <!-- Cool Text Section 4: Our Promise -->
+            <section class="promise mb-5">
+                <h2 class="display-4 fw-bold">Our Promise</h2>
+                <p class="lead">We’re committed to offering the best movies for your enjoyment. With a user-friendly
+                    interface, an ever-growing library, and unmatched customer service, we’re here to ensure you have the
+                    best movie-watching experience.</p>
+            </section>
+        }
+    </main>
+
+
+
+
+
+    <footer>
+        <p>&copy; 2024 iMovies | Designed with ❤️</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.11/jquery.validate.unobtrusive.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Render the Scripts section if it's defined in the page -->
+    @RenderSection("Scripts", required: false)
+
+    <script>
+        // Function to decode JWT and extract user info
+        const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
+
+        // Check if the accessToken cookie is found
+        if (tokenCookie) {
+            // Extract the token value
+            const token = tokenCookie.split('=')[1];
+
+            // Decode the token (assuming it's JWT) to get user info
+            const userInfo = JSON.parse(atob(token.split('.')[1])); // Decode payload from JWT
+            const username = userInfo?.unique_name || 'User'; // Assuming 'unique_name' is the key for username
+
+            // Display the username and logout button
+            document.getElementById('usernameText').textContent = `Hello, ${username}`;
+            document.getElementById('usernameContainer').style.display = 'block';
+            document.getElementById('logoutContainer').style.display = 'block';
+
+            // Add logout functionality
+            document.getElementById('logoutButton').addEventListener('click', function (event) {
+                event.preventDefault();
+                // Delete the access token cookie to log out
+                document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"; // Deleting cookie
+                // Redirect to the home page after logout
+                window.location.href = '/'; // Redirect to the home page (change if needed)
+            });
+        } else {
+            // Show login/register buttons if not logged in
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('registerContainer').style.display = 'block';
+        }
+    </script>
+
+</body>
+
+</html>

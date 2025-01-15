@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Reservations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ticket-reservation-container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .ticket-reservation-container h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .ticket-reservation-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .ticket-reservation-container table,
+        .ticket-reservation-container th,
+        .ticket-reservation-container td {
+            border: 1px solid #ddd;
+        }
+
+        .ticket-reservation-container th,
+        .ticket-reservation-container td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        .ticket-reservation-container th {
+            background-color: #f7f7f7;
+        }
+
+        .ticket-reservation-container button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .ticket-reservation-container button:hover {
+            background-color: #45a049;
+        }
+
+        .loading {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ticket-reservation-container">
+        <h2>Your Ticket Reservations</h2>
+
+        <table id="ticketReservationsTable">
+            <thead>
+                <tr>
+                    <th>Movie Name</th>
+                    <th>Show Time</th>
+                    <th>Duration</th>
+                    <th>Genre</th>
+                    <th>Amount</th>
+                    <th>Payment Method</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Function to get the user ID from the username stored in the cookie
+        async function getUserIdByUsername(username) {
+            try {
+                const response = await fetch(`http://localhost:5238/api/Auth/get-user-id/${username}`);
+                if (!response.ok) {
+                    throw new Error("User not found");
+                }
+                const data = await response.json();
+                if (data.userId) {
+                    return data.userId;  // Return the userId
+                } else {
+                    console.log("User not found");
+                    return null;
+                }
+            } catch (error) {
+                console.error("Error fetching userId:", error);
+            }
+        }
+
+        // Function to fetch ticket reservations using the userId
+        async function getTicketReservations() {
+            const userName = getCookie("userName"); // Get the userName from cookies
+            const userId = await getUserIdByUsername(userName); // Fetch the userId based on the username
+            if (!userId) return;
+
+            const response = await fetch(`http://localhost:5238/api/ticketreservation/${userId}`); // Fetch the ticket reservations based on userId
+            const reservations = await response.json();
+
+            if (reservations.length === 0) {
+                alert("No reservations found!");
+                return;
+            }
+
+            const tableBody = document.querySelector("#ticketReservationsTable tbody");
+            tableBody.innerHTML = "";  // Clear existing data
+
+            for (let reservation of reservations) {
+                // Fetch movie details by movieId for each reservation
+                const movieDetails = await getMovieById(reservation.movieId);
+
+                if (movieDetails) {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${movieDetails.name || 'N/A'}</td>
+                        <td>${new Date(reservation.showTime).toLocaleString()}</td>
+                        <td>${movieDetails.duration || 'N/A'}</td>
+                        <td>${movieDetails.genre || 'N/A'}</td>
+    <td>€${reservation.amount}</td>  <!-- Updated to use Euro symbol -->
+                        <td>${reservation.paymentMethod}</td>
+<td><button style="background-color: #f44336; color: white;" onclick="deleteReservation(${reservation.movieId}, '${reservation.userId}')">Delete</button></td>
+
+                    `;
+                    tableBody.appendChild(row);
+                }
+            }
+        }
+
+        // Function to fetch movie details by movieId
+        async function getMovieById(movieId) {
+            try {
+                const response = await fetch(`http://localhost:5238/api/movie/${movieId}`); // Call the GetById endpoint
+                if (!response.ok) {
+                    throw new Error("Movie not found");
+                }
+                const movie = await response.json();
+                return movie;  // Return the movie details
+            } catch (error) {
+                console.error("Error fetching movie details:", error);
+                return null;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+        async function deleteReservation(movieId, userId) {
+            try {
+
+                const response = await fetch(`http://localhost:5238/api/ticketreservation/${movieId}/${userId}`, {
+
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    alert("Error deleting reservation!");
+                    return;
+                }
+
+                alert("Reservation deleted successfully!");
+                // Remove the row from the table after deletion
+                getTicketReservations();
+
+            } catch (error) {
+                console.error("Error deleting reservation:", error);
+                alert("An error occurred while deleting the reservation.");
+            }
+        }
+
+        // Function to retrieve a specific cookie value by name
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Run when the page is loaded
+        window.onload = () => {
+            getTicketReservations(); // Call the function to load ticket reservations
+        };
+    </script>
+</body>
+
+</html>
