@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("iMovies")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1f6e421c3d614a56f198eb7a417938c9a4c1a82c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c13fec5f17b8575197391c23122d1aee0bb9bde8")]
 [assembly: System.Reflection.AssemblyProductAttribute("iMovies")]
 [assembly: System.Reflection.AssemblyTitleAttribute("iMovies")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

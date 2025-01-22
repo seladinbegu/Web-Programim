@@ -71,7 +71,7 @@
 
 <body>
     <div class="ticket-reservation-container">
-        <h2>Your Ticket Reservations</h2>
+        <h2>All Ticket Reservations</h2>
 
         <table id="ticketReservationsTable">
             <thead>
@@ -92,26 +92,6 @@
     </div>
 
     <script>
-        async function getUserIdByUsername(username) {
-            try {
-                const token = getCookie('accessToken');
-                const response = await fetch(`http://localhost:5238/api/Auth/get-user-id/${username}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error("User not found");
-                }
-                const data = await response.json();
-                return data.userId || null;
-            } catch (error) {
-                console.error("Error fetching userId:", error);
-                return null;
-            }
-        }
-
-
         async function getTicketReservations() {
             const token = getCookie('accessToken');
 
@@ -122,20 +102,8 @@
                 return;
             }
 
-            const userName = getCookie("userName");
-            if (!userName) {
-                alert("No username found in cookies!");
-                return;
-            }
-
-            const userId = await getUserIdByUsername(userName);
-            if (!userId) {
-                alert("Failed to retrieve user ID.");
-                return;
-            }
-
             try {
-                const response = await fetch(`http://localhost:5238/api/ticketreservation/${userId}`, {
+                const response = await fetch('http://localhost:5238/api/ticketreservation', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -159,18 +127,18 @@
                     if (movieDetails) {
                         const row = document.createElement("tr");
                         row.innerHTML = `
-                        <td>${movieDetails.name || 'N/A'}</td>
-                        <td>${new Date(reservation.showTime).toLocaleString()}</td>
-                        <td>${movieDetails.duration || 'N/A'} mins</td>
-                        <td>${movieDetails.genre || 'N/A'}</td>
-                        <td>€${reservation.amount}</td>
-                        <td>${reservation.paymentMethod}</td>
-                        <td>
-                            <button style="background-color: #f44336; color: white;" onclick="deleteReservation(${reservation.movieId}, '${reservation.userId}')">
-                                Delete
-                            </button>
-                        </td>
-                    `;
+                            <td>${movieDetails.name || 'N/A'}</td>
+                            <td>${new Date(reservation.showTime).toLocaleString()}</td>
+                            <td>${movieDetails.duration || 'N/A'} mins</td>
+                            <td>${movieDetails.genre || 'N/A'}</td>
+                            <td>€${reservation.amount}</td>
+                            <td>${reservation.paymentMethod}</td>
+                            <td>
+                                <button style="background-color: #f44336; color: white;" onclick="deleteReservation(${reservation.movieId}, '${reservation.userId}')">
+                                    Delete
+                                </button>
+                            </td>
+                        `;
                         tableBody.appendChild(row);
                     }
                 }

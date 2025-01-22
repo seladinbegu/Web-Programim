@@ -72,13 +72,13 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JWT:Audience"],
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigninKey"])),
-        RoleClaimType = ClaimTypes.Role // Ensure this is correctly set
+        RoleClaimType = ClaimTypes.Role // Ensure this matches the role claim in your token
 
     };
 })
 .AddCookie(options =>
 {
-    options.Cookie.HttpOnly = false; // Allow JavaScript access to the cookie
+    options.Cookie.HttpOnly = true; // Allow JavaScript access to the cookie
     options.Cookie.SameSite = SameSiteMode.Lax; // Allow cross-site requests
     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
     options.SlidingExpiration = true;
@@ -114,11 +114,12 @@ app.UseStaticFiles();
 app.UseRouting();
 
 
-
-app.UseAuthorization();
-app.UseAuthentication();
-
 app.UseCors("CorsPolicy");
+
+app.UseAuthentication();  // Should come before UseAuthorization
+app.UseAuthorization();   // Authorization should come after authentication
+
+
 
 
 

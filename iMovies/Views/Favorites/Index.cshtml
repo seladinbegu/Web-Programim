@@ -67,11 +67,34 @@
         .movie-info .duration {
             color: #999;
         }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .pagination button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .pagination button:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
 <body>
     <div class="movie-container" id="movieContainer"></div>
+
+    <div class="pagination" id="pagination"></div>
 
     <script>
         // Utility function to get cookie by name
@@ -105,8 +128,18 @@
         }
 
         // Fetch user's favorite movies
+        let allMovies = [];
+        let currentPage = 1;
+        const moviesPerPage = 3;
+
         function fetchFavorites(userId) {
             const token = getCookie('accessToken'); // Get token here to pass with the request
+            if (!token) {  // Check if the token is null or empty
+                if (confirm("You need to log in to see your favorite movies! Click OK to log in.")) {
+                    window.location.href = '@Url.Action("Login", "Account")'; // Redirect to the login page using the provided URL
+                }
+                return; // Stop the function if there is no token
+            }
             console.log("Token:", token);
 
             fetch(`http://localhost:5238/api/movieuser/user-favorites/${userId}`, {
@@ -119,7 +152,9 @@
                 .then(data => {
                     console.log("Fetched Movies: ", data); // Debugging log
                     if (Array.isArray(data)) {
-                        displayMovies(data, userId);
+                        allMovies = data;
+                        displayMovies(currentPage);
+                        updatePagination();
                     } else {
                         console.error("Data is not an array", data);
                     }
@@ -129,18 +164,22 @@
                 });
         }
 
-        // Display movie cards
-        function displayMovies(movies, userId) {
+        // Display movie cards for the current page
+        function displayMovies(page) {
             const movieContainer = document.getElementById('movieContainer');
             movieContainer.innerHTML = '';  // Clear any previous content
 
-            // Check if movies array is not empty
-            if (movies.length === 0) {
+            // Get the subset of movies for the current page
+            const start = (page - 1) * moviesPerPage;
+            const end = start + moviesPerPage;
+            const moviesToDisplay = allMovies.slice(start, end);
+
+            if (moviesToDisplay.length === 0) {
                 movieContainer.innerHTML = '<p>No favorite movies found.</p>';
             }
 
             // Loop through the movies and create movie cards
-            movies.forEach(movie => {
+            moviesToDisplay.forEach(movie => {
                 console.log('Movie Data:', movie);  // Check the movie object to ensure movie.id exists
                 const movieCard = document.createElement('div');
                 movieCard.classList.add('movie-card');
@@ -170,6 +209,38 @@
 
                 movieContainer.appendChild(movieCard);
             });
+        }
+
+        // Update the pagination buttons
+        function updatePagination() {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = '';  // Clear any previous content
+
+            const totalPages = Math.ceil(allMovies.length / moviesPerPage);
+
+            const prevButton = document.createElement('button');
+            prevButton.textContent = 'Previous';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayMovies(currentPage);
+                    updatePagination();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayMovies(currentPage);
+                    updatePagination();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
         }
 
         // Remove movie from favorites

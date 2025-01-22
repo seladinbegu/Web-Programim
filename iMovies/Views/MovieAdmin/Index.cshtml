@@ -79,7 +79,45 @@
         <h1>Movies</h1>
 
         <!-- Create/Update Movie Form -->
+        <div class="mb-4">
+            <h3 id="form-title">Create a New Movie</h3>
+            <form id="movie-form">
+                <input type="hidden" id="movie-id"> <!-- Hidden field for movie ID -->
 
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="genre">Genre:</label>
+                    <input type="text" class="form-control" id="genre" required>
+                </div>
+                <div class="form-group">
+                    <label for="showDate">Show Date:</label>
+                    <input type="datetime-local" class="form-control" id="showDate" required>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="duration">Duration:</label>
+                    <div class="d-flex">
+                        <input type="number" class="form-control" id="minutes" min="0" placeholder="Minutes" required>
+                        <input type="number" class="form-control ml-2" id="seconds" min="0" max="59"
+                            placeholder="Seconds" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="imgPath">Image URL:</label>
+                    <input type="url" class="form-control" id="imgPath">
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-2" id="form-submit-btn">Add Movie</button>
+                <button type="button" class="btn btn-secondary mt-2" id="form-cancel-btn"
+                    style="display: none;">Cancel</button>
+            </form>
+        </div>
 
         <!-- Movies List -->
         <div id="movie-list" class="row">
@@ -148,6 +186,8 @@
                                 <p class="card-text">Duration: ${movie.duration}</p>
                                 <p class="card-text">Genre: ${movie.genre}</p>
                                 <p class="card-text">Show Date: ${movie.showDate}</p>
+                                <button onclick="populateForm(${movie.id})" class="btn btn-warning btn-sm">Edit</button>
+                                <button onclick="deleteMovie(${movie.id})" class="btn btn-danger btn-sm">Delete</button>
                                 <button onclick="addToFavorites(${movie.id})" class="btn btn-success btn-sm">Add to Favorites</button>
                                 <button onclick="openPaymentOptions(${movie.id})" class="btn btn-success btn-sm">Get Tickets</button>
                             </div>
@@ -284,7 +324,7 @@
 
 
         // Event listener for form submission (either Create or Edit)
-        @* document.getElementById("movie-form").addEventListener("submit", function (event) {
+        document.getElementById("movie-form").addEventListener("submit", function (event) {
             event.preventDefault();
 
             // Prepare the movie data from the form
@@ -295,12 +335,29 @@
                 showDate: document.getElementById("showDate").value,
                 duration: `${document.getElementById("minutes").value}:${document.getElementById("seconds").value}`,
                 imgPath: document.getElementById("imgPath").value,
-            }; *@
+            };
 
+            const method = movieData.id ? "PUT" : "POST";
+            const url = movieData.id ? `${apiBaseUrl}/${movieData.id}` : apiBaseUrl;
 
-        const token = getCookie("accessToken");
+            const token = getCookie("accessToken");
 
+            fetch(url, {
+                method: method,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`, // Add the Authorization header with the token
 
+                },
+                body: JSON.stringify(movieData)
+            })
+                .then(response => response.json())
+                .then(() => {
+                    fetchMovies(); // Refresh movie list after submission
+                    document.getElementById("movie-form").reset();
+                })
+                .catch(error => console.error("Error saving movie:", error));
+        });
 
         function deleteMovie(movieId) {
             const token = getCookie('accessToken'); // Get token from cookies

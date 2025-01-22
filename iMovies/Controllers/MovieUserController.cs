@@ -24,7 +24,10 @@ namespace iMovies.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+
         public IActionResult Get()
+
         {
             var movieuser = _context.MovieUsers.ToList().Select(s => s.toMovieUserDto());
             return Ok(movieuser);
@@ -32,6 +35,8 @@ namespace iMovies.Controllers
 
 
         [HttpGet("{movieId}/{userId}")]
+        [Authorize(Roles = "Admin, User")]
+
         public IActionResult Get(int movieId, string userId)
         {
             // Fetch the data based on the provided movieId and userId
@@ -50,6 +55,8 @@ namespace iMovies.Controllers
 
         // GET: api/MovieUser/user-favorites/{userId}
         [HttpGet("user-favorites/{userId}")]
+        [Authorize(Roles = "Admin, User")]
+
         public async Task<IActionResult> GetUserFavorites(string userId)
         {
             try
@@ -89,6 +96,8 @@ namespace iMovies.Controllers
 
 
         [HttpPost("add-to-favorites")]
+        [Authorize(Roles = "Admin, User")]
+
         public async Task<IActionResult> AddToFavorites([FromBody] MovieUserDto movieUserDto)
         {
             try
@@ -133,6 +142,8 @@ namespace iMovies.Controllers
 
         // DELETE: api/MovieUser/remove-favorite
         [HttpDelete("remove-favorite/{movieId}/{userId}")]
+        [Authorize(Roles = "Admin, User")]
+
         public async Task<IActionResult> RemoveFavorite(int movieId, string userId)
         {
             if (string.IsNullOrEmpty(userId))

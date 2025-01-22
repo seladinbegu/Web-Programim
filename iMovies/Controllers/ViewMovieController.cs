@@ -26,4 +26,7 @@ public class MoviesController : Controller
 
         return View(movieDtos); // Will render Views/Movies/Index.cshtml
     }
+
+
+
 }

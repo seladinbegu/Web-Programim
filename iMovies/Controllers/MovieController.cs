@@ -20,6 +20,7 @@ namespace iMovies.Controllers
 
         // GET all movies
         [HttpGet]
+
         public IActionResult Get()
         {
             var movie = _context.Movies.ToList().Select(s => s.toMovieDto());
@@ -28,6 +29,7 @@ namespace iMovies.Controllers
 
         // GET movie by ID
         [HttpGet("{id}")]
+
         public IActionResult GetById(int id)
         {
             var movie = _context.Movies.FirstOrDefault(m => m.Id == id);
@@ -37,7 +39,11 @@ namespace iMovies.Controllers
             }
             return Ok(movie.toMovieDto());
         }
+
+
+
         [HttpGet("title/{title}")]
+
         public IActionResult GetByTitle(string title)
         {
             var movie = _context.Movies.FirstOrDefault(m => m.Name.Equals(title, System.StringComparison.OrdinalIgnoreCase));
@@ -51,6 +57,7 @@ namespace iMovies.Controllers
 
         // POST create a new movie
         [HttpPost]
+        [Authorize(Roles = "Admin")]  // Restrict this action to admin users
         public IActionResult Create([FromBody] MovieCreateDto movieDto)
         {
             if (!ModelState.IsValid)
@@ -69,6 +76,8 @@ namespace iMovies.Controllers
 
         // PUT update movie by ID
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]  // Restrict this action to admin users
+
         public IActionResult Update([FromRoute] int id, [FromBody] MovieUpdateDto updateDto)
         {
             var movieModel = _context.Movies.FirstOrDefault(m => m.Id == id);

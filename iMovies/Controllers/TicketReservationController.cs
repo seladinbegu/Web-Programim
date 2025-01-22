@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using iMovies.Data;
 using iMovies.DTOs.TicketReservation;
 using iMovies.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,7 @@ namespace iMovies.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]  // Restrict this action to admin users
         public async Task<IActionResult> GetAll()
         {
             List<TicketReservationDto> ticketreservations = await _context.TicketReservations.Select(tr => tr.toTicketReservationDto()).ToListAsync();

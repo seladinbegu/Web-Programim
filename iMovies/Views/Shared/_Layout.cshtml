@@ -89,6 +89,12 @@
             /* Space between login and register buttons */
         }
 
+        .adminbutton {
+            margin-left: 10px;
+            margin-right: 10px;
+            ;
+        }
+
         /* Navbar responsive adjustments */
         .navbar-nav {
             margin-top: 10px;
@@ -252,6 +258,13 @@
                         <li class="nav-item">
                             <a class="btn btn-primary" href="/ViewTicketReservation">My Ticket Reservations</a>
                         </li>
+                        <li class="adminbutton">
+                            <a class="btn btn-primary" href="/ViewAdminMovie">Admin Button</a>
+                        </li>
+                        <li class="adminbutton">
+                            <a class="btn btn-primary" href="/admin/ticket-reservation/index">All Ticket
+                                Reservations</a>
+                        </li>
 
 
 
@@ -341,36 +354,68 @@
     @RenderSection("Scripts", required: false)
 
     <script>
-        // Function to decode JWT and extract user info
-        const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the userName from cookies
+            const userNameCookie = document.cookie.split('; ').find(row => row.startsWith('userName='));
 
-        // Check if the accessToken cookie is found
-        if (tokenCookie) {
-            // Extract the token value
-            const token = tokenCookie.split('=')[1];
+            // Get the admin button element
+            const adminButton = document.querySelector('.adminbutton');
 
-            // Decode the token (assuming it's JWT) to get user info
-            const userInfo = JSON.parse(atob(token.split('.')[1])); // Decode payload from JWT
-            const username = userInfo?.unique_name || 'User'; // Assuming 'unique_name' is the key for username
+            if (adminButton) {
+                if (userNameCookie) {
+                    const usernameValue = userNameCookie.split('=')[1];
 
-            // Display the username and logout button
-            document.getElementById('usernameText').textContent = `Hello, ${username}`;
-            document.getElementById('usernameContainer').style.display = 'block';
-            document.getElementById('logoutContainer').style.display = 'block';
+                    // Only show admin button if username is 'seladin'
+                    if (usernameValue === "seladin") {
+                        adminButton.style.display = 'block'; // Show the admin button
+                    } else {
+                        adminButton.style.display = 'none'; // Hide the admin button
+                    }
+                } else {
+                    adminButton.style.display = 'none'; // Hide the admin button if no userName cookie
+                }
+            }
 
-            // Add logout functionality
-            document.getElementById('logoutButton').addEventListener('click', function (event) {
-                event.preventDefault();
-                // Delete the access token cookie to log out
-                document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"; // Deleting cookie
-                // Redirect to the home page after logout
-                window.location.href = '/'; // Redirect to the home page (change if needed)
-            });
-        } else {
-            // Show login/register buttons if not logged in
-            document.getElementById('loginContainer').style.display = 'block';
-            document.getElementById('registerContainer').style.display = 'block';
-        }
+            // Get the token cookie
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
+
+            // Check if the accessToken cookie is found
+            if (tokenCookie) {
+                // Extract the token value
+                const token = tokenCookie.split('=')[1];
+
+                // Decode the token (assuming it's JWT) to get user info
+                const userInfo = JSON.parse(atob(token.split('.')[1])); // Decode payload from JWT
+                const username = userInfo?.unique_name || 'User'; // Assuming 'unique_name' is the key for username
+
+                // Display the username and the logout button
+                document.getElementById('usernameText').textContent = `Hello, ${username}`;
+                document.getElementById('usernameContainer').style.display = 'block';
+                document.getElementById('logoutContainer').style.display = 'block';
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('registerContainer').style.display = 'none';
+            } else {
+                // If the token is not found, hide the username and logout button
+                document.getElementById('usernameContainer').style.display = 'none';
+                document.getElementById('logoutContainer').style.display = 'none';
+                document.getElementById('loginContainer').style.display = 'block';
+                document.getElementById('registerContainer').style.display = 'block';
+            }
+
+            // Logout functionality
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function () {
+                    // Clear cookies
+                    document.cookie = 'accessToken=; path=/; max-age=0'; // Remove accessToken cookie
+                    document.cookie = 'userName=; path=/; max-age=0'; // Remove userName cookie
+
+                    // Redirect to login page or update UI
+                    window.location.reload(); // Refresh to show login page or redirect
+                });
+            }
+        });
+
     </script>
 
 </body>
